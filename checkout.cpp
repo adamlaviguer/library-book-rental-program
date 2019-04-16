@@ -39,8 +39,8 @@ Book * searchBook(vector<Book *> myBooks, int id) {
 int readPersons(vector<Person *> & myCardholders);
 void readBooks(vector<Book *> & myBooks);
 void bookCheckout(vector<Person *> & myCardholders, vector<Book *> & myBooks);
-bool validCardID(vector<Person *> &myCardholders, int &cardID);
-bool validBookID(vector<Book *> &myBooks, int &bookID);
+bool validCardID(vector<Person *> &myCardholders, int cardID, int &index);
+bool validBookID(vector<Book *> &myBooks, int bookID, int &index);
 
 int main()
 {
@@ -53,8 +53,6 @@ int main()
     {
         // If you use cin anywhere, don't forget that you have to handle the <ENTER> key that
         // the user pressed when entering a menu option. This is still in the input stream.
-        vector<Book *> myBooks;
-        vector<Person *> myCardholders;
         printMenu();
         cin >> choice;
         cin.ignore();
@@ -107,22 +105,19 @@ int main()
 int readPersons(vector<Person *> & myCardholders) {
     ifstream inData;
     inData.open("persons.txt", ios::in);
-    int cardNo, largestID, nextID;
+    int cardNo, largestID;
     bool act;
     string fName, lName;
-    while (!inData.eof()) {
-        inData>>cardNo>>act>>fName>>lName;
-        //cout<<cardNo<<" "<<act<<" "<<fName<<" "<<lName<<endl;
-        Person * personPtr;
+    Person * personPtr = NULL;
+    while (inData>>cardNo) {
+        inData>>act>>fName>>lName;
         personPtr = new Person(cardNo, act, fName, lName);
         myCardholders.push_back(personPtr);
         largestID = cardNo;
-        cout<<personPtr->getId()<<" "<<personPtr->isActive()<<" "<<personPtr->fullName()<<endl;
-        cout<<myCardholders.size()<<"*Size of myCardholders test*"<<endl;
+        //test code//cout<<personPtr->getId()<<" "<<personPtr->isActive()<<" "<<personPtr->fullName()<<endl;
     }
     inData.close();
-    nextID=largestID+1;
-    return nextID;
+    return largestID+1;
 }
 
 void readBooks(vector<Book *> & myBooks) {
@@ -130,33 +125,33 @@ void readBooks(vector<Book *> & myBooks) {
     inData.open("books.txt", ios::in);
     int id;
     string bookName, auth, cat, line;
+    Book * bookPtr = NULL;
     while (inData>>id) {
         getline(inData, line);
         getline(inData, bookName);
         getline(inData, auth);
         getline(inData, cat);
         getline(inData, line);
-        Book * bookPtr;
         bookPtr = new Book(id, bookName, auth, cat);
         myBooks.push_back(bookPtr);
     }
     inData.close();
 }
 
-bool validCardID(vector<Person *> &myCardholders, int &cardID){
-    cout<<myCardholders.size()<<"*Size of myCardholders test*"<<endl;
+bool validCardID(vector<Person *> &myCardholders, int cardID, int &index){
     for (int i=0; i<myCardholders.size(); i++){
-        cout<<myCardholders.at(i)->getId()<<"*test*"<<endl;
-        if (cardID==myCardholders.at(i)->getId()){
+        if (cardID==myCardholders.at(i)->getId() && myCardholders.at(i)->isActive()==true){
+            index=i;
             return true;
         }
     }
     return false;
 }
 
-bool validBookID(vector<Book *> &myBooks, int &bookID){
+bool validBookID(vector<Book *> &myBooks, int bookID, int &index){
     for (int i=0; i<myBooks.size(); i++){
         if (bookID==myBooks.at(i)->getId()){
+            index=i;
             return true;
         }
     }
@@ -164,31 +159,29 @@ bool validBookID(vector<Book *> &myBooks, int &bookID){
 }
 
 void bookCheckout(vector<Person *> &myCardholders, vector<Book *> &myBooks){
+    int cardID, bookID, index;
     //get the users card ID
-    int cardID;
     cout<<"Please enter the card ID: ";
     cin>>cardID;
     cin.ignore();
 
-    cout<<myCardholders.size()<<"*Size of myCardholders test*"<<endl;
-    bool valid=validCardID(myCardholders, cardID);
-    cout<<valid<<"*Validity test*"<<endl;
-    if (valid){
-        cout<<"Card ID is valid."<<endl;
+    if (validCardID(myCardholders, cardID, index)){
+        cout<<"Cardholder: "<<myCardholders.at(index)->fullName()<<endl;
     }
     else{
-        cout<<"Card ID "<<cardID<<" not found"<<endl;
-        bookCheckout(myCardholders, myBooks);
+        cout<<"Card ID not found"<<endl<<endl;
+        main();
     }
     //get the users book ID
-    int bookID;
     cout<<"Please enter the book ID: ";
     cin>>bookID;
     cin.ignore();
-    if (validBookID(myBooks, bookID)==true){
-        cout<<"Book ID is valid."<<endl;
+
+    if (validBookID(myBooks, bookID, index)==true){
+        cout<<"Title: "<<myBooks.at(index)->getTitle()<<endl;
     }
     else{
-        cout<<"Book ID not found"<<endl;
+        cout<<"Book ID not found"<<endl<<endl;
+        main();
     }
 }

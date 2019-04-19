@@ -42,6 +42,7 @@ void viewCardholderRentals(vector<Person *> &myCardholders, vector<Book *> & myB
 void openCard(vector<Person *> & myCardholders, int &nextID);
 void closeCard(vector<Person *> & myCardholders);
 void updateRecords(vector<Person *> & myCardholders, vector<Book *> & myBooks);
+void deletePointers(vector<Person *> & myCardholders, vector<Book *> & myBooks);
 
 int main()
 {
@@ -99,6 +100,7 @@ int main()
             case 8:
                 // Must update records in files here before exiting the program
                 updateRecords(myCardholders, myBooks);
+                deletePointers(myCardholders, myBooks);
                 break;
 
             default:
@@ -381,4 +383,15 @@ void updateRecords(vector<Person *> & myCardholders, vector<Book *> & myBooks){
         }
     }
     outRentals.close();
+}
+
+void deletePointers(vector<Person *> & myCardholders, vector<Book *> & myBooks){
+    for (int i=0; i<myCardholders.size(); i++){
+        delete myCardholders.at(i);
+        myCardholders.at(i)=nullptr;
+    }
+    for (int j=0; j<myBooks.size(); j++){
+        delete myBooks.at(j);
+        myBooks.at(i)=nullptr;
+    }
 }
